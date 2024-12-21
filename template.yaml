@@ -28,6 +28,12 @@ Resources:
           Properties:
             Path: /hello
             Method: get
+      DeploymentPreference:
+        Enabled: true
+        Type: AllAtOnce # Other options: Canary10Percent5Minutes, Linear10PercentEvery1Minute, etc.
+        Hooks:
+          PreTraffic: !Ref PreTrafficHookFunction
+          PostTraffic: !Ref PostTrafficHookFunction
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -36,6 +42,26 @@ Resources:
         Sourcemap: true
         EntryPoints:
         - app.ts
+
+  PreTrafficHookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello-world/pre-traffic-hook/
+      Handler: preHook.lambdaHandler
+      Runtime: nodejs18.x
+      Architectures:
+      - x86_64
+      Timeout: 3
+
+  PostTrafficHookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello-world/post-traffic-hook/
+      Handler: postHook.lambdaHandler
+      Runtime: nodejs18.x
+      Architectures:
+      - x86_64
+      Timeout: 3
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
