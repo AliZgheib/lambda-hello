@@ -15,7 +15,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         return {
             statusCode: 200,
             body: JSON.stringify({
-                message: 'post traffic hook',
+                message: 'post traffic hook new',
             }),
         };
     } catch (err) {

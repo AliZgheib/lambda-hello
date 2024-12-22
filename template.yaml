@@ -5,7 +5,6 @@ Description: >
 
   Sample SAM Template for sam-app
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 3
@@ -13,6 +12,34 @@ Globals:
       LogFormat: JSON
 
 Resources:
+  # Explicit IAM Role for CodeDeploy with AWS-Managed Policies + Custom Inline Policies
+  CodeDeployServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codedeploy.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda
+        - arn:aws:iam::aws:policy/AWSLambda_FullAccess
+      Policies:
+        - PolicyName: CustomCodeDeployPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codedeploy:PutLifecycleEventHookExecutionStatus
+                  - codedeploy:GetDeploymentConfig
+                  - codedeploy:GetDeployment
+                Resource: "*"
+
   HelloWorldFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -20,7 +47,7 @@ Resources:
       Handler: app.lambdaHandler
       Runtime: nodejs18.x
       Architectures:
-      - x86_64
+        - x86_64
       Events:
         HelloWorld:
           Type: Api
@@ -30,7 +57,8 @@ Resources:
       AutoPublishAlias: live # Required for DeploymentPreference
       DeploymentPreference:
         Enabled: true
-        Type: AllAtOnce # Options: Canary10Percent5Minutes, Linear10PercentEvery1Minute, etc.
+        Type: Canary10Percent5Minutes # Options: Canary10Percent5Minutes, Linear10PercentEvery1Minute, etc.
+        Role: !GetAtt CodeDeployServiceRole.Arn # Reference the custom role here
         Hooks:
           PreTraffic: !Ref PreTrafficHookFunction
           PostTraffic: !Ref PostTrafficHookFunction
@@ -41,27 +69,43 @@ Resources:
         Target: es2020
         Sourcemap: true
         EntryPoints:
-        - app.ts
+          - app.ts
 
   PreTrafficHookFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello-world/pre-traffic-hook/
+      CodeUri: pre-traffic-hook/
       Handler: preHook.lambdaHandler
       Runtime: nodejs18.x
       Architectures:
-      - x86_64
+        - x86_64
       Timeout: 3
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - preHook.ts
 
   PostTrafficHookFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello-world/post-traffic-hook/
+      CodeUri: post-traffic-hook/
       Handler: postHook.lambdaHandler
       Runtime: nodejs18.x
       Architectures:
-      - x86_64
+        - x86_64
       Timeout: 3
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - postHook.ts
 
 Outputs:
   HelloWorldApi:
