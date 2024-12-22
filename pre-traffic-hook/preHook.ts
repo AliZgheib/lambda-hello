@@ -1,4 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { signalFailure, signalSuccess } from '../common';
 
 /**
  *
@@ -12,6 +13,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
+        await signalSuccess(event);
         return {
             statusCode: 200,
             body: JSON.stringify({
@@ -19,6 +21,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             }),
         };
     } catch (err) {
+        await signalFailure(event);
         console.log(err);
         return {
             statusCode: 500,

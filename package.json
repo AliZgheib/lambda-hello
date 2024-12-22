@@ -12,6 +12,7 @@
     "compile": "tsc"
   },
   "dependencies": {
+    "@aws-sdk/client-codedeploy": "^3.716.0",
     "esbuild": "^0.14.14"
   },
   "devDependencies": {
