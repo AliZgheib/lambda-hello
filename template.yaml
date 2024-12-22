@@ -74,7 +74,7 @@ Resources:
   PreTrafficHookFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: pre-traffic-hook/
+      CodeUri: hooks/
       Handler: preHook.lambdaHandler
       Runtime: nodejs18.x
       Architectures:
@@ -92,7 +92,7 @@ Resources:
   PostTrafficHookFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: post-traffic-hook/
+      CodeUri: hooks/
       Handler: postHook.lambdaHandler
       Runtime: nodejs18.x
       Architectures:

@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
-import { signalFailure, signalSuccess } from '../common';
+import { signalFailure, signalSuccess } from './common';
 
 /**
  *

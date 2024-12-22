@@ -1,5 +1,5 @@
 import { CodeDeployClient, PutLifecycleEventHookExecutionStatusCommand } from '@aws-sdk/client-codedeploy';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+
 const codedeploy = new CodeDeployClient({ region: 'us-east-1' });
 
 // Function to signal success to CodeDeploy
