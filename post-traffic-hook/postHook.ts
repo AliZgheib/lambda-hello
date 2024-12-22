@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyResult } from 'aws-lambda';
 import { signalFailure, signalSuccess } from '../common';
 
 /**
@@ -11,7 +11,7 @@ import { signalFailure, signalSuccess } from '../common';
  *
  */
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const lambdaHandler = async (event: any): Promise<APIGatewayProxyResult> => {
     try {
         await signalSuccess(event);
         return {
