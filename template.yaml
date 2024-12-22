@@ -5,12 +5,6 @@ Description: >
 
   Sample SAM Template for sam-app
 
-Globals:
-  Function:
-    Timeout: 3
-    LoggingConfig:
-      LogFormat: JSON
-
 Resources:
   # Explicit IAM Role for CodeDeploy with AWS-Managed Policies + Custom Inline Policies
   CodeDeployServiceRole:
@@ -28,18 +22,44 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda
         - arn:aws:iam::aws:policy/AWSLambda_FullAccess
+
+  # IAM Role for Lambda Functions
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
       Policies:
-        - PolicyName: CustomCodeDeployPolicy
+        - PolicyName: 'LambdaCodeDeployPolicy'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Effect: Allow
+              # Permission to signal CodeDeploy status
+              - Effect: 'Allow'
                 Action:
-                  - codedeploy:PutLifecycleEventHookExecutionStatus
-                  - codedeploy:GetDeploymentConfig
-                  - codedeploy:GetDeployment
-                Resource: "*"
-
+                  - 'codedeploy:PutLifecycleEventHookExecutionStatus'
+                Resource: '*'
+              # Permission to log to CloudWatch
+              - Effect: 'Allow'
+                Action:
+                  - 'logs:*'
+                Resource: '*'
+              # Lambda permissions to interact with CodeDeploy and other necessary services
+              - Effect: 'Allow'
+                Action:
+                  - 'lambda:InvokeFunction'
+                Resource: '*'
+              # Allow Lambda functions to read deployment metadata
+              - Effect: 'Allow'
+                Action:
+                  - 'codedeploy:GetDeployment'
+                Resource: '*'
+                
   HelloWorldFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -79,7 +99,8 @@ Resources:
       Runtime: nodejs18.x
       Architectures:
         - x86_64
-      Timeout: 3
+      Timeout: 60
+      Role: !GetAtt LambdaExecutionRole.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -97,7 +118,8 @@ Resources:
       Runtime: nodejs18.x
       Architectures:
         - x86_64
-      Timeout: 3
+      Timeout: 60
+      Role: !GetAtt LambdaExecutionRole.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

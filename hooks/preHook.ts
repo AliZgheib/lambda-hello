@@ -13,7 +13,11 @@ import { signalFailure, signalSuccess } from './common';
 
 export const lambdaHandler = async (event: any): Promise<APIGatewayProxyResult> => {
     try {
-        await signalSuccess(event);
+        console.log('event', event);
+
+        const r = await signalSuccess(event);
+        console.log('r', r);
+
         return {
             statusCode: 200,
             body: JSON.stringify({
@@ -21,8 +25,11 @@ export const lambdaHandler = async (event: any): Promise<APIGatewayProxyResult> 
             }),
         };
     } catch (err) {
-        await signalFailure(event);
-        console.log(err);
+        console.log('err', err);
+
+        const r = await signalFailure(event);
+        console.log('r', r);
+
         return {
             statusCode: 500,
             body: JSON.stringify({
